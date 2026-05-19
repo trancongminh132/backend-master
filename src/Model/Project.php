@@ -7,6 +7,11 @@ class Project
     /**
      * @var array
      */
+    /**
+     * Low Severity: 
+     * 1. $_data scope should be private/protected to encapsulate object
+     * 
+     */
     public $_data;
     
     public function __construct($data)

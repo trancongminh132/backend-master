@@ -9,6 +9,10 @@ class Task implements \JsonSerializable
      */
     private $_data;
     
+    /**
+     * Low Severity: 
+     * No type hints on constructor
+     */
     public function __construct($data)
     {
         $this->_data = $data;
