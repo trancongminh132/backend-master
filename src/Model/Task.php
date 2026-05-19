@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * Recommend: add declare(strict_types=1); at the beginning of the file
+ */
+
 namespace App\Model;
 
 class Task implements \JsonSerializable
@@ -10,8 +14,8 @@ class Task implements \JsonSerializable
     private $_data;
     
     /**
-     * Low Severity: 
-     * No type hints on constructor
+     * Low Severity: Missing type hint for $data
+     * 
      */
     public function __construct($data)
     {

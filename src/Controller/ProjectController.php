@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * Recommend: add declare(strict_types=1); at the beginning of the file
+ */
+
 namespace Api\Controller;
 
 use App\Model;
@@ -22,6 +26,9 @@ class ProjectController
     }
 
     /**
+     * Low Severity: Missing @return
+     */
+    /**
      * @param Request $request
      * 
      * @Route("/project/{id}", name="project", method="GET")
@@ -31,11 +38,15 @@ class ProjectController
         try {
             /**
              * Issues:
-             * 1. Medium Severity: Missing validation for id, id existence 
+             * 1. Medium Severity: Missing validation for id (int, existence)
              * 2. High Severity: no authorization, anyone can see any projects
              */
             $project = $this->storage->getProjectById($request->get('id'));
 
+            /**
+             * Medium Severity:
+             * With code below, seem double encoded JSON because JsonResponse already calls json_encode() internally
+             */
             return new Response($project->toJson());
         } catch (Model\NotFoundException $e) {
             return new Response('Not found', 404);
@@ -48,6 +59,9 @@ class ProjectController
     }
 
     /**
+     * Low Severity: Missing @return
+     */
+    /**
      * @param Request $request
      *
      * @Route("/project/{id}/tasks", name="project-tasks", method="GET")
@@ -56,7 +70,10 @@ class ProjectController
     {
         /**
          * Issues:
-         * 1. Medium Severity: Missing validation for id, limit and offset. 
+         * 1. Medium Severity: Missing validation for
+         *   ++ id: int, project existence
+         *   ++ limit: int, max-min range
+         *   ++ offset: int, max-min range, > 0 
          * Validation should include: type, and range value. Also, should validate "id" existence
          * 2. High Severity: no authorization, anyone can see any tasks of any projects
          */
@@ -66,9 +83,17 @@ class ProjectController
             $request->get('offset')
         );
 
+        /**
+         * Medium Severity: tasks is array of object, could not encode
+         * Change to "return new JsonResponse($tasks);"
+         *
+         */
         return new Response(json_encode($tasks));
     }
 
+    /**
+     * Low Severity: Missing @return
+     */
     /**
      * @param Request $request
      *
@@ -100,6 +125,6 @@ class ProjectController
     /**
      * Beside that, there are some minor issues:
      * 1. Return should be consistent as some methods return JsonResponse, some methods return Response
-     * 2. Missing proper http status codes or custom code when return
+     * 2. Some method missing return proper http status codes or system custom code
      */
 }

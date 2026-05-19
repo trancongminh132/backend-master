@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * Recommend: add declare(strict_types=1); at the beginning of the file
+ */
+
 namespace App\Storage;
 
 use App\Model;
@@ -23,11 +27,16 @@ class DataStorage
          * High Severity: hardcode db credentials, should store in environment variables or config files 
          */
         /**
-         * Medium Severity: No DI, cause hard to test
+         * Medium Severity: Missing dependency injection, cause hard to test
          */
         $this->pdo = new \PDO('mysql:dbname=task_tracker;host=127.0.0.1', 'user');
     }
 
+    /**
+     * Low Severity: 
+     * 1. Missing type hint for $projectId
+     * 2. Missing @return
+     */
     /**
      * @param int $projectId
      * @throws Model\NotFoundException
@@ -40,6 +49,15 @@ class DataStorage
          */
         $stmt = $this->pdo->query('SELECT * FROM project WHERE id = ' . (int) $projectId);
 
+        /**
+         * for cleaner, we can do like:
+         * $row = $stmt->fetch(PDO::FETCH_ASSOC);
+         * if (!$row) {
+         *    throw new Model\NotFoundException();
+         * }
+         * 
+         * return new Model\Project($row);
+         */
         if ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
             return new Model\Project($row);
         }
@@ -48,6 +66,11 @@ class DataStorage
     }
 
     /**
+     * Low Severity: 
+     * 1. Missing @return
+     * 2. Missing type hint for $limit and $offset
+     */
+    /**
      * @param int $project_id
      * @param int $limit
      * @param int $offset
@@ -55,7 +78,9 @@ class DataStorage
     public function getTasksByProjectId(int $project_id, $limit, $offset)
     {
         /**
-         * Critical Severity: SQL injection vulnerability (Ex: project_id = "1 OR 1=1"). Should prepare data (sanitization) before pass into query.
+         * Critical Severity: 
+         * 1. SQL injection vulnerability (Ex: project_id = "1 OR 1=1")
+         * 2. query() executes immediately while placeholders (?) only work with prepare()
          */
         $stmt = $this->pdo->query("SELECT * FROM task WHERE project_id = $project_id LIMIT ?, ?");
         $stmt->execute([$limit, $offset]);
@@ -68,6 +93,9 @@ class DataStorage
         return $tasks;
     }
 
+    /**
+     * Low Severity: Missing type hint for $projectId
+     */
     /**
      * @param array $data
      * @param int $projectId
@@ -83,8 +111,7 @@ class DataStorage
         }, $data));
 
         /**
-         * Many issues here:
-         * 
+         * Issues:
          * 1. Critical Severity: SQL injection vulnerability (Ex: $data['title'] = 'abc", 1); DROP TABLE task; --'; ) 
          * 2. Medium Severity: SELECT MAX(id) could be Race condition if many query execute at the same time.
          * 3. Low Severity: No escape special characters
